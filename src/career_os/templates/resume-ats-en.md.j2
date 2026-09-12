@@ -1,0 +1,43 @@
+# {{ profile.full_name }}
+
+{% if profile.headline %}{{ profile.headline }}{% endif %}
+
+{% if profile.location %}{{ profile.location.country }}{% endif %}{% if profile.links.linkedin %} | {{ profile.links.linkedin }}{% endif %}
+
+## Professional Experience
+
+{% for item in experiences %}
+### {{ item.role }} — {{ item.company }}
+
+{{ item.dates.start }} – {% if item.current %}Present{% else %}{{ item.dates.end }}{% endif %}
+
+{% for highlight in item.highlights %}- {{ highlight }}
+{% endfor %}
+{% endfor %}
+
+## Core Skills
+
+{% for category, values in skills.items() %}**{{ category | replace('_', ' ') | title }}:** {{ values | join(', ') }}
+
+{% endfor %}
+
+## Education
+
+{% for item in education %}
+### {{ item.degree }} — {{ item.institution }}
+{{ item.dates.start }} – {{ item.dates.end }}{% if item.grade %} | {{ item.grade }}{% endif %}
+
+{% endfor %}
+
+## Certifications
+
+{% for item in certifications if item.type == 'certification' %}- {{ item.name }} — {{ item.issuer }}{% if item.issued %} ({{ item.issued }}){% endif %}
+{% endfor %}
+
+{% set training = certifications | selectattr('type', 'in', ['training', 'course']) | list %}
+{% if training %}
+## Professional Training
+
+{% for item in training %}- {{ item.name }} — {{ item.issuer }}{% if item.issued %} ({{ item.issued }}){% endif %}
+{% endfor %}
+{% endif %}
