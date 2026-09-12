@@ -12,6 +12,7 @@ def valid_documents():
                     "role": "Senior Software Engineer",
                     "dates": {"start": "2024-01"},
                     "current": True,
+                    "skills": ["Java", "Distributed Systems", "AWS"],
                     "verification": {"status": "verified", "source": "profile"},
                 }
             ]
@@ -72,3 +73,21 @@ def test_credential_type_is_controlled():
     issues = validate_career(documents)
 
     assert any("certification" in issue.path for issue in issues)
+
+
+def test_experience_skills_cannot_have_duplicates():
+    documents = valid_documents()
+    documents["experience"]["experiences"][0]["skills"] = ["Java", "Java"]
+
+    issues = validate_career(documents)
+
+    assert any("skills must not contain duplicates" in issue.message for issue in issues)
+
+
+def test_experience_skills_cannot_be_empty():
+    documents = valid_documents()
+    documents["experience"]["experiences"][0]["skills"] = ["Java", "  "]
+
+    issues = validate_career(documents)
+
+    assert any("skills must not contain empty values" in issue.message for issue in issues)
