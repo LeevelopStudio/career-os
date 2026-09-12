@@ -54,8 +54,19 @@ class Experience(StrictModel):
     dates: DateRange
     current: bool
     domains: list[str] = Field(default_factory=list)
+    skills: list[str] = Field(default_factory=list)
     highlights: list[str] = Field(default_factory=list)
     verification: Verification
+
+    @field_validator("skills")
+    @classmethod
+    def validate_skills(cls, values: list[str]) -> list[str]:
+        normalized = [value.strip() for value in values]
+        if any(not value for value in normalized):
+            raise ValueError("skills must not contain empty values")
+        if len(set(normalized)) != len(normalized):
+            raise ValueError("skills must not contain duplicates")
+        return normalized
 
     @model_validator(mode="after")
     def validate_current_period(self) -> "Experience":
