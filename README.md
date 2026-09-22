@@ -2,35 +2,64 @@
 
 > Treat your career like software: version it, validate it, generate it, and evolve it.
 
-CareerOS is an open-source platform inspired by Platform Engineering and GitOps principles. It treats professional career information as structured, version-controlled data and generates consistent professional artifacts from a single source of truth.
+CareerOS is an open-source **Career as Code** engine inspired by Platform Engineering and GitOps. Professional facts remain in a user-owned source of truth; CareerOS validates that data, selects evidence for a target profile, and renders reproducible career artifacts.
 
-## Why CareerOS?
-
-Professional information is usually duplicated across resumes, LinkedIn, portfolios, personal websites, cover letters, and interview notes. CareerOS reduces that duplication by introducing **Career as Code**.
+## v0.1 Engine
 
 ```text
-Career Data
-    ↓
-Validation
-    ↓
-CareerOS Domain Model
-    ↓
-Generators
-    ├── Resume
-    ├── LinkedIn Draft
-    ├── Portfolio
-    ├── GitHub Profile
-    └── Interview Material
+Career repository
+  profile / experience / skills / education / credentials / languages
+                         │
+                         ▼
+                   CareerOS Loader
+                         │
+                         ▼
+                 Domain + Validation
+                         │
+                         ▼
+                  Target Profile
+                         │
+                         ▼
+               Evidence / Skill Selection
+                         │
+                         ▼
+                    Renderers
+               MD / HTML / PDF / DOCX
 ```
 
-## Initial Scope
+The public engine contains no private career data. A private or local career repository owns the facts and invokes CareerOS locally or from CI.
 
-The first usable version will:
+## CLI
 
-- Load structured career data.
-- Validate profile, experience, achievements, skills, education, languages, and projects.
-- Generate an ATS-oriented English resume in Markdown.
-- Keep private career data separate from the public CareerOS engine.
+```bash
+python -m pip install -e .
+
+career validate --root /path/to/career
+
+career build resume \
+  --root /path/to/career \
+  --profile platform-engineer \
+  --format pdf \
+  --output generated/resume-platform-engineer-en.pdf
+```
+
+Supported resume formats in v0.1 are `md`, `html`, `pdf`, and `docx`.
+
+## Core Model
+
+CareerOS v0.1 models profile data, experiences, domains, canonical skills, education, credentials, languages, and target profiles. Experiences provide evidence for skills; target profiles control prioritization without duplicating career history.
+
+The design deliberately separates facts from presentation:
+
+```text
+career facts → validated domain model → target selection → artifact
+```
+
+AI is not required to generate a valid artifact and must not become the source of professional facts.
+
+## Automation
+
+The engine has its own test workflow. Consumer career repositories can install CareerOS, validate their source of truth, generate multiple target profiles and formats, and publish the generated files as CI artifacts.
 
 ## Project Documents
 
@@ -42,12 +71,12 @@ The first usable version will:
 
 ## Repository Model
 
-- `career-os`: public engine, schemas, templates, generators, tests, and documentation.
-- `career`: private professional data and generated personal outputs.
+- `career-os`: public engine, models, validation, selection, renderers, tests, and documentation.
+- consumer career repository: private/user-owned professional data and generated outputs.
 
 ## Status
 
-CareerOS is currently in **Sprint 0 — Product Foundation**.
+**v0.1 engine implementation** — executable vertical slice with multi-format resume generation and profile targeting.
 
 ## License
 
