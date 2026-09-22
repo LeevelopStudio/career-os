@@ -58,14 +58,15 @@ class Experience(StrictModel):
     highlights: list[str] = Field(default_factory=list)
     verification: Verification
 
-    @field_validator("skills")
+    @field_validator("domains", "skills")
     @classmethod
-    def validate_skills(cls, values: list[str]) -> list[str]:
+    def validate_unique_terms(cls, values: list[str]) -> list[str]:
         normalized = [value.strip() for value in values]
         if any(not value for value in normalized):
-            raise ValueError("skills must not contain empty values")
-        if len(set(normalized)) != len(normalized):
-            raise ValueError("skills must not contain duplicates")
+            raise ValueError("values must not contain empty strings")
+        folded = [value.casefold() for value in normalized]
+        if len(set(folded)) != len(folded):
+            raise ValueError("values must not contain duplicates")
         return normalized
 
     @model_validator(mode="after")
@@ -103,3 +104,18 @@ class Credential(StrictModel):
         if value is not None and not DATE_RE.fullmatch(value):
             raise ValueError("must use YYYY, YYYY-MM, or YYYY-MM-DD")
         return value
+
+
+class TargetProfile(StrictModel):
+    id: str
+    target_titles: list[str] = Field(default_factory=list)
+    emphasis: dict[str, list[str]] = Field(default_factory=dict)
+    preferred_experience_order: list[str] = Field(default_factory=list)
+    keywords: list[str] = Field(default_factory=list)
+    writing: dict[str, object] = Field(default_factory=dict)
+
+
+class Language(StrictModel):
+    language: str
+    level: str
+    verification: str | None = None
