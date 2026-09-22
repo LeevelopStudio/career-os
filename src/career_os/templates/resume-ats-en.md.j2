@@ -17,9 +17,7 @@
 
 ## Core Skills
 
-{% for category, values in skills.items() %}**{{ category | replace('_', ' ') | title }}:** {{ values | join(', ') }}
-
-{% endfor %}
+{{ skills | join(', ') }}
 
 ## Education
 
@@ -39,5 +37,12 @@
 ## Professional Training
 
 {% for item in training %}- {{ item.name }} — {{ item.issuer }}{% if item.issued %} ({{ item.issued }}){% endif %}
+{% endfor %}
+{% endif %}
+
+{% if languages %}
+## Languages
+
+{% for item in languages %}- {{ item.language }} — {{ item.level }}
 {% endfor %}
 {% endif %}
