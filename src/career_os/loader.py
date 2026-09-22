@@ -26,16 +26,23 @@ def _read_yaml(path: Path) -> dict[str, Any]:
 
 def load_career(root: str | Path) -> dict[str, Any]:
     root = Path(root).resolve()
-    manifest_path = root / "career-os.yml"
-    manifest = _read_yaml(manifest_path)
+    manifest = _read_yaml(root / "career-os.yml")
     source = manifest.get("source")
     if not isinstance(source, dict):
         raise CareerLoadError("career-os.yml must contain a 'source' mapping")
 
-    documents: dict[str, Any] = {"manifest": manifest}
+    documents: dict[str, Any] = {"manifest": manifest, "_root": root}
     for key, relative_path in source.items():
         if not isinstance(relative_path, str):
             raise CareerLoadError(f"source.{key} must be a path string")
         documents[key] = _read_yaml(root / relative_path)
 
+    profiles: dict[str, Any] = {}
+    for relative_path in manifest.get("profiles", []):
+        payload = _read_yaml(root / relative_path)
+        profile = payload.get("profile")
+        if not isinstance(profile, dict) or not profile.get("id"):
+            raise CareerLoadError(f"{relative_path} must contain profile.id")
+        profiles[str(profile["id"])] = profile
+    documents["target_profiles"] = profiles
     return documents
