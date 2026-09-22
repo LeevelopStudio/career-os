@@ -23,7 +23,7 @@
 
 {% for item in education %}
 ### {{ item.degree }} — {{ item.institution }}
-{{ item.dates.start }} – {{ item.dates.end }}{% if item.grade %} | {{ item.grade }}{% endif %}
+{{ item.dates.start }} – {{ item.dates.end }}{% if item.get('grade') %} | {{ item.grade }}{% endif %}
 
 {% endfor %}
 
