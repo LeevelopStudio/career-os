@@ -1,93 +1,78 @@
 # CareerOS Roadmap
 
-The roadmap is outcome-oriented. Dates will be added only after the first implementation language and delivery cadence are agreed.
+The roadmap is outcome-oriented. CareerOS keeps the deterministic Career as Code engine separate from future AI and SaaS layers.
 
 ## Sprint 0 — Product Foundation
 
-- Define vision, mission, principles, and non-goals.
-- Document the separation between the public engine and private career data.
-- Establish the initial architecture and ADR process.
-- Define the first vertical slice and release sequence.
+- Vision, principles, non-goals, repository boundaries, architecture, ADR process, and first vertical slice.
 
-## v0.1.0 — Structured Career Data to Markdown Resume
+## v0.1.0 — CareerOS Engine
 
-**Outcome:** A user can validate structured career data and generate an English ATS-oriented resume in Markdown.
+**Outcome:** A user can keep career facts in a source-of-truth repository, validate them, select a target profile, and generate distribution-ready resume artifacts.
 
-- Define the initial domain model.
-- Define schemas for profile, experience, achievements, skills, education, certifications, languages, and projects.
-- Implement input loading and validation.
-- Implement the first resume template.
-- Provide fictional public sample data.
-- Add automated tests and CI quality gates.
+- [x] Career as Code repository model
+- [x] Domain model for profile, experience, domains, skills, education, credentials, languages, and target profiles
+- [x] Validation and duplicate/reference checks
+- [x] Canonical skills taxonomy
+- [x] Target-profile selection
+- [x] Markdown rendering
+- [x] HTML rendering
+- [x] PDF rendering
+- [x] DOCX rendering
+- [x] Engine CI
+- [x] Consumer-repository GitHub Actions pipeline
+- [x] Generated artifacts kept outside the canonical facts
 
-## v0.2.0 — Multiple Resume Views
+## v0.2.0 — Career Intelligence
 
-**Outcome:** The same career source can generate role-focused resume variants.
+**Outcome:** CareerOS can match a job or goal to verified career evidence without inventing facts.
 
-- Master resume
-- ATS resume
-- Platform Engineering resume
-- Senior Java resume
-- Software Architecture resume
-- Portuguese and Spanish localization foundations
+- Job-description parser
+- Requirement and skill matching
+- Evidence scoring
+- Achievement selection
+- ATS-oriented composition
+- AI-assisted rewriting with explicit grounding and human review
 
-## v0.3.0 — Document Formats
+## v0.3.0 — Multi-person / Multi-domain
 
-**Outcome:** Markdown output can be transformed into distribution-ready formats.
+**Outcome:** The same engine works for different professions and users.
 
-- HTML generation
-- PDF generation
-- DOCX generation
-- Deterministic formatting checks
-- Release artifacts
+- Software Engineering reference dataset
+- Product Design reference dataset
+- Generic domain-model hardening
+- Public fictional examples and onboarding
 
-## v0.4.0 — Professional Profile Generators
+## v0.4.0 — API
 
-**Outcome:** CareerOS can produce synchronized content for other professional channels.
+**Outcome:** CareerOS capabilities are available without requiring Git or YAML.
 
-- LinkedIn About draft
-- LinkedIn experience descriptions
-- GitHub profile README
-- Short and long professional bios
+- Profile APIs
+- Experience and skill APIs
+- Job analysis
+- Resume generation jobs
+- Artifact retrieval
+- Versioned schemas
 
-## v0.5.0 — Portfolio and Case Studies
+## v1.0.0 — CareerOS SaaS
 
-**Outcome:** Projects and achievements can become sanitized public portfolio content.
+**Outcome:** CareerOS becomes a self-service career intelligence platform.
 
-- Project case-study pages
-- Architecture decision summaries
-- Static portfolio website
-- GitHub Pages deployment
-
-## v0.6.0 — Interview Preparation
-
-**Outcome:** Real experience can be transformed into reusable interview material.
-
-- STAR stories
-- Technical deep-dive prompts
-- Architecture interview narratives
-- Leadership and behavioral examples
-
-## v1.0.0 — Stable CareerOS CLI
-
-**Outcome:** CareerOS provides a documented, stable workflow for managing Career as Code.
-
-Proposed commands:
-
-```text
-career init
-career validate
-career build
-career generate resume
-career generate linkedin
-career generate portfolio
-```
+- Web application
+- Authentication and user-owned career profiles
+- Career editor
+- Job targeting
+- Resume builder and version history
+- PDF/DOCX generation
+- Portfolio/profile generators
+- Subscription/billing layer
 
 ## Future Exploration
 
+- LinkedIn and portfolio drafts
+- Interview preparation and STAR stories
 - Plugin SDK
-- Job-description-based resume selection
-- AI-assisted drafting with explicit human review
-- Schema migration support
-- Web interface
-- Additional professional domains beyond software engineering
+- Localization
+- Schema migrations
+- Static career sites
+- Additional professional domains
