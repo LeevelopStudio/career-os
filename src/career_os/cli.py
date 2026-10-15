@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import sys
 from .intelligence import analysis_as_dict, analyze_job
+from .achievements import rank_achievements
 from .loader import CareerLoadError, load_career
 from .renderer import write_resume
 from .validator import validate_career
@@ -32,15 +33,21 @@ def build_command(root:Path,output:Path,profile:str|None,format:str|None)->int:
     except ValueError as exc: print(f"✗ {exc}",file=sys.stderr); return 2
     print(f"✓ Generated {generated}"); return 0
 
-def analyze_job_command(root:Path,job:Path,json_output:bool)->int:
+def analyze_job_command(root:Path,job:Path,json_output:bool,profile:str|None=None,achievements:bool=False)->int:
     try: documents,issues=_load_validated(root)
     except CareerLoadError as exc: print(f"✗ {exc}",file=sys.stderr); return 2
     if issues: _print_issues(issues); return 1
     if not job.exists():
         print(f"✗ Missing job description: {job}",file=sys.stderr); return 2
     analysis=analyze_job(documents,job.read_text(encoding="utf-8"))
+    if profile and profile not in documents.get('target_profiles', {}):
+        print(f'✗ Unknown target profile: {profile}',file=sys.stderr); return 2
+    ranked=rank_achievements(documents,analysis,profile) if achievements else []
     if json_output:
-        print(json.dumps(analysis_as_dict(analysis),indent=2))
+        payload=analysis_as_dict(analysis)
+        if achievements:
+            payload['achievements']=[{'experience_id':a.experience_id,'highlight_index':a.highlight_index,'text':a.text,'matched_requirements':list(a.matched_requirements),'score':a.score,'reasons':list(a.reasons)} for a in ranked]
+        print(json.dumps(payload,indent=2,ensure_ascii=False))
         return 0
     print("CareerOS job analysis\n")
     if not analysis.requirements:
@@ -52,6 +59,13 @@ def analyze_job_command(root:Path,job:Path,json_output:bool)->int:
             print(f"✓ {item.skill}: {', '.join(item.evidence_experience_ids)}")
         else:
             print(f"○ {item.skill}: no verified career evidence")
+    if achievements:
+        print('\nRanked achievements (explicit evidence only)\n')
+        if not ranked: print('No achievements explicitly mention detected requirements.')
+        for position,item in enumerate(ranked,1):
+            print(f'{position}. [{item.score:g}] {item.experience_id} / highlight #{item.highlight_index + 1}')
+            print(f'   Requirements: {", ".join(item.matched_requirements)}')
+            print(f'   {item.text}')
     return 0
 
 def _parser():
@@ -64,13 +78,15 @@ def _parser():
     job.add_argument("job",type=Path)
     job.add_argument("--root",default=".",type=Path)
     job.add_argument("--json",action="store_true",dest="json_output")
+    job.add_argument("--profile",help="Target profile for achievement relevance weighting")
+    job.add_argument("--achievements",action="store_true",help="Rank existing career highlights by explicit job relevance")
     return parser
 
 def main():
     args=_parser().parse_args()
     if args.command=="validate": raise SystemExit(validate_command(args.root))
     if args.command=="build": raise SystemExit(build_command(args.root,args.output,args.profile,args.format))
-    if args.command=="analyze" and args.analysis=="job": raise SystemExit(analyze_job_command(args.root,args.job,args.json_output))
+    if args.command=="analyze" and args.analysis=="job": raise SystemExit(analyze_job_command(args.root,args.job,args.json_output,args.profile,args.achievements))
     raise SystemExit(2)
 
 if __name__=="__main__": main()
