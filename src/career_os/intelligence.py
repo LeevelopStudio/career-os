@@ -44,9 +44,8 @@ def _contains_term(text: str, term: str) -> bool:
     normalized_term = _normalize(term)
     if not normalized_term:
         return False
-    if " " in normalized_term:
-        return normalized_term in text
-    return normalized_term in set(text.split())
+    # Token-boundary matching also prevents false positives for multiword aliases.
+    return re.search(rf"(?<!\\S){re.escape(normalized_term)}(?!\\S)", text) is not None
 
 
 def extract_skill_requirements(documents: dict[str, Any], description: str) -> list[str]:
