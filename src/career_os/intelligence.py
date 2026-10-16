@@ -37,7 +37,7 @@ class JobAnalysis:
 
 
 def _normalize(value: str) -> str:
-    return " ".join(TOKEN_RE.findall(value.casefold()))
+    return " ".join(token.rstrip(".") for token in TOKEN_RE.findall(value.casefold()) if token.rstrip("."))
 
 
 def _contains_term(text: str, term: str) -> bool:
