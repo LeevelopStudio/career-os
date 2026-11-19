@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 from .intelligence import analysis_as_dict, analyze_job
 from .achievements import rank_achievements
+from .composer import compose_targeted_resume
 from .loader import CareerLoadError, load_career
 from .renderer import write_resume
 from .validator import validate_career
@@ -25,10 +26,19 @@ def validate_command(root: Path)->int:
     if issues: _print_issues(issues); return 1
     print("✓ Career data is valid."); return 0
 
-def build_command(root:Path,output:Path,profile:str|None,format:str|None)->int:
+def build_command(root:Path,output:Path,profile:str|None,format:str|None,job:Path|None=None,report:Path|None=None)->int:
     try: documents,issues=_load_validated(root)
     except CareerLoadError as exc: print(f"✗ {exc}",file=sys.stderr); return 2
     if issues: _print_issues(issues); return 1
+    if job is not None:
+        if not job.is_file():
+            print(f'✗ Missing job description: {job}',file=sys.stderr); return 2
+        if profile and profile not in documents.get('target_profiles', {}):
+            print(f'✗ Unknown target profile: {profile}',file=sys.stderr); return 2
+        documents,selection=compose_targeted_resume(documents,job.read_text(encoding='utf-8'),profile)
+        if report:
+            report.parent.mkdir(parents=True,exist_ok=True)
+            report.write_text(json.dumps(selection,indent=2,ensure_ascii=False)+'\\n',encoding='utf-8')
     try: generated=write_resume(documents,output,profile_id=profile,format=format)
     except ValueError as exc: print(f"✗ {exc}",file=sys.stderr); return 2
     print(f"✓ Generated {generated}"); return 0
@@ -71,7 +81,7 @@ def analyze_job_command(root:Path,job:Path,json_output:bool,profile:str|None=Non
 def _parser():
     parser=argparse.ArgumentParser(prog="career",description="CareerOS command-line interface"); sub=parser.add_subparsers(dest="command",required=True)
     v=sub.add_parser("validate",help="Validate CareerOS source data"); v.add_argument("--root",default=".",type=Path)
-    b=sub.add_parser("build",help="Generate career artifacts"); b.add_argument("artifact",choices=["resume"]); b.add_argument("--root",default=".",type=Path); b.add_argument("--profile"); b.add_argument("--format",choices=["md","html","pdf","docx"]); b.add_argument("--output",default=Path("generated/resume-ats-en.md"),type=Path)
+    b=sub.add_parser("build",help="Generate career artifacts"); b.add_argument("artifact",choices=["resume"]); b.add_argument("--root",default=".",type=Path); b.add_argument("--profile"); b.add_argument("--format",choices=["md","html","pdf","docx"]); b.add_argument("--output",default=Path("generated/resume-ats-en.md"),type=Path); b.add_argument("--job",type=Path,help="Tailor resume using verified evidence for this vacancy"); b.add_argument("--report",type=Path,help="Write a JSON selection and evidence report")
     a=sub.add_parser("analyze",help="Analyze external inputs against verified career evidence")
     a_sub=a.add_subparsers(dest="analysis",required=True)
     job=a_sub.add_parser("job",help="Analyze a job description")
@@ -85,7 +95,7 @@ def _parser():
 def main():
     args=_parser().parse_args()
     if args.command=="validate": raise SystemExit(validate_command(args.root))
-    if args.command=="build": raise SystemExit(build_command(args.root,args.output,args.profile,args.format))
+    if args.command=="build": raise SystemExit(build_command(args.root,args.output,args.profile,args.format,args.job,args.report))
     if args.command=="analyze" and args.analysis=="job": raise SystemExit(analyze_job_command(args.root,args.job,args.json_output,args.profile,args.achievements))
     raise SystemExit(2)
 
